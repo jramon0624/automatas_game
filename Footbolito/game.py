@@ -1,5 +1,6 @@
 import pygame
 import random
+import math
 from entities import Jugador, Portero, Balon
 from utils import jugador_mas_cercano
 
@@ -56,7 +57,8 @@ equipo_2 += crear_jugadores_aleatorios(2, 6)  # Agregar 6 jugadores al equipo 2
 
 def reiniciar_balon():
     balon.x, balon.y = ANCHO // 2, ALTO // 2
-    balon.vx, balon.vy = 0, 0
+    balon.vx = random.uniform(-5,5)
+    balon.vy = random.choice([-1,1]) * math.sqrt(balon.speed**2 - balon.vx**2)
 
 
 def main():

@@ -56,9 +56,10 @@ class Portero(Jugador):
 class Balon:
     def __init__(self):
         self.x, self.y = ANCHO // 2, ALTO // 2
-        self.vx, self.vy = 0, 0
-        self.radius = 8
         self.speed = 5
+        self.vx = random.uniform(-5,5)
+        self.vy = random.choice([-1,1]) * math.sqrt(self.speed**2 - self.vx**2)
+        self.radius = 8
 
     def mover(self):
         self.x += self.vx
@@ -70,12 +71,17 @@ class Balon:
             self.vy *= -1
 
     def golpear(self, jugador):
-        dx = self.x - jugador.x
-        dy = self.y - jugador.y
-        distancia = math.hypot(dx, dy)
+        if jugador.equipo_id == 1:
+            dx = random.uniform(0,5)
+        else:
+            dx = random.uniform(-5,0)
+
+        self.vx = dx
+        self.vy = random.choice([-1,1]) * math.sqrt(self.speed**2 - self.vx**2)
+        #distancia = math.hypot(dx, dy)
         
-        self.vx = (dx / distancia) * self.speed
-        self.vy = (dy / distancia) * self.speed
+        #self.vx = (dx / distancia) * self.speed
+        #self.vy = (dy / distancia) * self.speed
 
     def dibujar(self, ventana):
         pygame.draw.circle(ventana, (255, 255, 255), (int(self.x), int(self.y)), self.radius)
