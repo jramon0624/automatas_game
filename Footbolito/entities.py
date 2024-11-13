@@ -8,31 +8,48 @@ AREA_PORTERIA_1 = pygame.Rect(0, ALTO // 4, 50, ALTO // 2)
 AREA_PORTERIA_2 = pygame.Rect(ANCHO - 50, ALTO // 4, 50, ALTO // 2)
 
 class Jugador:
-    def __init__(self, equipo, x, y, controls):
-        self.equipo = equipo
-        self.x, self.y = x, y
-        self.controls = controls
-        self.speed = 5
-        self.radius = 10
+    def __init__(self, equipo_id, x, y, controles=None, aleatorio=False):
+        self.equipo_id = equipo_id
+        self.x = x
+        self.y = y
+        self.controles = controles
+        self.aleatorio = aleatorio  
+        self.velocidad = 5
+        self.radius = 10  
         self.active = False
 
     def mover(self, teclas):
-        if teclas[self.controls['arriba']]: self.y -= self.speed
-        if teclas[self.controls['abajo']]: self.y += self.speed
-        if teclas[self.controls['izquierda']]: self.x -= self.speed
-        if teclas[self.controls['derecha']]: self.x += self.speed
+        if not self.aleatorio and self.controles:
+            if teclas[self.controles['arriba']]:
+                self.y -= self.velocidad
+            if teclas[self.controles['abajo']]:
+                self.y += self.velocidad
+            if teclas[self.controles['izquierda']]:
+                self.x -= self.velocidad
+            if teclas[self.controles['derecha']]:
+                self.x += self.velocidad
+
+    def mover_aleatorio(self):
+        if self.aleatorio:
+            dx = random.choice([-1, 0, 1]) * self.velocidad
+            dy = random.choice([-1, 0, 1]) * self.velocidad
+            self.x += dx
+            self.y += dy
+
+            if self.equipo_id == 1:
+                self.x = max(50, min(self.x, ANCHO // 2 - 50))
+            else:
+                self.x = max(ANCHO // 2 + 50, min(self.x, ANCHO - 50))
+            self.y = max(50, min(self.y, ALTO - 50))
 
     def dibujar(self, ventana):
-        color = (255, 0, 0) if self.equipo == 1 else (0, 0, 255)
-        pygame.draw.circle(ventana, color, (int(self.x), int(self.y)), self.radius)
-
-    def distancia_a(self, balon):
-        return math.hypot(self.x - balon.x, self.y - balon.y)
+        color = (0, 0, 255) if self.equipo_id == 1 else (255, 0, 0)
+        pygame.draw.circle(ventana, color, (self.x, self.y), self.radius)  # Usamos el radius aquí
 
 class Portero(Jugador):
     def mover(self, teclas):
         super().mover(teclas)
-        area = AREA_PORTERIA_1 if self.equipo == 1 else AREA_PORTERIA_2
+        area = AREA_PORTERIA_1 if self.equipo_id == 1 else AREA_PORTERIA_2
         if not area.collidepoint(self.x, self.y):
             self.x, self.y = max(area.left, min(area.right, self.x)), max(area.top, min(area.bottom, self.y))
 
@@ -53,12 +70,10 @@ class Balon:
             self.vy *= -1
 
     def golpear(self, jugador):
-        # Con esto calculamos la dirección del balón dependiendo de la posición del jugador
         dx = self.x - jugador.x
         dy = self.y - jugador.y
         distancia = math.hypot(dx, dy)
         
-        # para acelerar el balon
         self.vx = (dx / distancia) * self.speed
         self.vy = (dy / distancia) * self.speed
 
