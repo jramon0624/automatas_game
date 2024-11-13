@@ -9,7 +9,7 @@ ventana = pygame.display.set_mode((ANCHO, ALTO))
 pygame.display.set_caption("Minifootball")
 
 # Imagen de la cancha
-cancha_imagen = pygame.image.load("Images/cancha.png")
+cancha_imagen = pygame.image.load("rsc/football_bg.png")
 cancha_imagen = pygame.transform.scale(cancha_imagen, (ANCHO, ALTO))
 
 # Áreas de gol para cada portería
