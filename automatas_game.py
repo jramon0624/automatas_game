@@ -67,7 +67,7 @@ class Ball(Object):
 
 class Player(Object):
 
-    dr = 5
+    dr = 20
     box = 20
     
     def __init__(self, x: int, y: int, color: str):
@@ -84,11 +84,14 @@ class Player(Object):
         x = self.dx
         y = self.dy
         theta = math.atan(y/x if x!= 0 else 100000)
+        phi = rd.triangular(theta - math.pi/2,theta + math.pi/2)
 
-        bounds = (self.dr * math.cos(theta + math.pi/2), self.dr * math.cos(theta - math.pi/2))
-        if rd.choice([True,False]):
-            self.dx = rd.uniform(min(bounds),max(bounds))
-            self.dy = rd.choice([-1,1]) * math.sqrt(abs(self.dr**2 - self.dx**2))
+        # bounds = (self.dr * math.cos(theta + math.pi/2), self.dr * math.cos(theta - math.pi/2))
+        # if rd.choice([True,False]):
+            # self.dx = rd.uniform(min(bounds),max(bounds))
+            # self.dy = math.sin(math.acos(self.dx/self.dr))
+        self.dx = self.dr * math.cos(phi)
+        self.dy = self.dr * math.sin(phi)
         self.setx(self.xcor() + self.dx)
         self.sety(self.ycor() + self.dy)
     
@@ -127,14 +130,14 @@ if __name__ == "__main__":
     team_blue = [Player(x,y,"blue") for x, y in position_blue]
 
     goalkeeper_red = Player(400,0,"yellow")
-    goalkeeper_red.center = 450
+    goalkeeper_red.center = 390
     goalkeeper_red.height = 150
-    goalkeeper_red.width = 50
+    goalkeeper_red.width = 60
 
     goalkeeper_blue = Player(-400,0,"black")
-    goalkeeper_blue.center = -450
+    goalkeeper_blue.center = -390
     goalkeeper_blue.height = 150
-    goalkeeper_blue.width = 50
+    goalkeeper_blue.width = 60
 
     while True:
         sc.update()
