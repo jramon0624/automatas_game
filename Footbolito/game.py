@@ -73,6 +73,29 @@ def dibujar_boton(ventana, boton, texto, color_fondo, color_texto, hover=False):
     )
 
 
+# Áreas ajustadas de la cancha y porterías
+LIMITE_SUPERIOR = 50  # Línea superior de la cancha en la imagen
+LIMITE_INFERIOR = 650  # Línea inferior de la cancha en la imagen
+LIMITE_IZQUIERDO = 40  # Borde izquierdo de la cancha en la imagen
+LIMITE_DERECHO = 760  # Borde derecho de la cancha en la imagen
+
+AREA_GOL_1 = pygame.Rect(LIMITE_IZQUIERDO, 270, 20, 110)  # Ajuste para la portería izquierda
+AREA_GOL_2 = pygame.Rect(LIMITE_DERECHO - 20, 270, 20, 110)  # Ajuste para la portería derecha
+
+
+# Función de mover ajustada para que el balón respete los límites de la cancha
+def mover_balon(balon):
+    balon.x += balon.vx
+    balon.y += balon.vy
+
+    # Rebote en los bordes de la cancha
+    if balon.x - balon.radius <= LIMITE_IZQUIERDO or balon.x + balon.radius >= LIMITE_DERECHO:
+        balon.vx *= -1
+    if balon.y - balon.radius <= LIMITE_SUPERIOR or balon.y + balon.radius >= LIMITE_INFERIOR:
+        balon.vy *= -1
+
+
+# Actualización en el ciclo principal
 def main():
     global tiempo_juego, en_juego, pausa
 
@@ -96,7 +119,7 @@ def main():
                     goles[1], goles[2] = 0, 0
                     tiempo_juego = 0
 
-        # Dibujar cabecera superior
+        # Dibujar elementos visuales
         ventana.fill((128, 128, 128))  # Fondo gris oscuro
         pygame.draw.rect(ventana, (30, 30, 30), (0, 0, ANCHO, 50))  # Cabecera superior
         ventana.blit(cancha_imagen, (0, 50))  # Cancha debajo de la cabecera
@@ -131,10 +154,11 @@ def main():
                 if balon.colisiona_con(jugador):
                     balon.golpear(jugador)
 
-            balon.mover()
+            # Actualización del movimiento del balón con límites ajustados
+            mover_balon(balon)
             balon.dibujar(ventana)
 
-            # Detección de goles
+            # Detección de goles con áreas ajustadas
             if AREA_GOL_1.collidepoint(balon.x, balon.y):
                 goles[2] += 1
                 reiniciar_balon()
