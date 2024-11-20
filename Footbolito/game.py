@@ -3,7 +3,7 @@ import random as rd
 import math
 from entities import Jugador, Portero, Balon
 
-ANCHO, ALTO = 800, 700  # Espacio extra para cabecera y botones
+ANCHO, ALTO = 800, 700  # Tamaño de la ventana
 pygame.init()
 ventana = pygame.display.set_mode((ANCHO, ALTO))
 pygame.display.set_caption("Football Automatas Game")
@@ -13,6 +13,7 @@ cancha_imagen = pygame.image.load("Images/cancha.png")
 cancha_imagen = pygame.transform.scale(cancha_imagen, (ANCHO, 600))
 pygame.font.init()
 fuente = pygame.font.Font(None, 36)
+fuente_pequeña = pygame.font.Font(None, 24)
 
 # Áreas del juego
 AREA_GOL_1 = pygame.Rect(0, 219, 20, 169)  # Portería izquierda
@@ -31,9 +32,9 @@ tiempo_juego = 0  # Tiempo en segundos
 reloj = pygame.time.Clock()
 
 # Botones
-boton_iniciar = pygame.Rect(50, 655, 100, 30)
-boton_pausar = pygame.Rect(ANCHO // 2 - 50, 655, 100, 30)
-boton_reiniciar = pygame.Rect(ANCHO - 150, 655, 100, 30)
+boton_iniciar = pygame.Rect(50, 655, 200, 30)
+boton_pausar = pygame.Rect(300, 655, 200, 30)
+boton_reiniciar = pygame.Rect(550, 655, 200, 30)
 
 en_juego = False  # Estado del juego (pausado o activo)
 pausa = False
@@ -65,12 +66,11 @@ def dibujar_boton(ventana, boton, texto, color_fondo, color_texto, hover=False):
     pygame.draw.rect(ventana, (0, 0, 0), boton, 2, border_radius=5)  # Borde negro
     if hover:
         pygame.draw.rect(ventana, (255, 255, 255), boton, 2, border_radius=5)  # Borde blanco si está en hover
-    texto_render = fuente.render(texto, True, color_texto)
+    texto_render = fuente_pequeña.render(texto, True, color_texto)
     ventana.blit(
         texto_render,
         (boton.x + boton.width // 2 - texto_render.get_width() // 2, boton.y + boton.height // 2 - texto_render.get_height() // 2),
     )
-
 
 
 def main():
@@ -101,21 +101,26 @@ def main():
         pygame.draw.rect(ventana, (30, 30, 30), (0, 0, ANCHO, 50))  # Cabecera superior
         ventana.blit(cancha_imagen, (0, 50))  # Cancha debajo de la cabecera
 
-        # Cabecera inferior (área de botones)
-        pygame.draw.rect(ventana, (128, 128, 128), (0, 650, ANCHO, 50))  # Fondo gris oscuro
+        # Mostrar información de equipos y marcador
+        pygame.draw.rect(ventana, (70, 130, 180), (0, 0, 200, 50))  # Fondo Equipo A
+        pygame.draw.rect(ventana, (240, 240, 240), (600, 0, 200, 50))  # Fondo Equipo B
 
-        # Dibujar cabecera de información
-        texto_marcador = fuente.render(f"Equipo 1: {goles[1]}", True, (255, 255, 255))
-        texto_tiempo = fuente.render(f"{int(tiempo_juego // 60):02}:{int(tiempo_juego % 60):02}", True, (255, 255, 255))
-        texto_marcador_2 = fuente.render(f"Equipo 2: {goles[2]}", True, (255, 255, 255))
-        ventana.blit(texto_marcador, (50, 10))
+        texto_equipo_1 = fuente_pequeña.render("EQUIPO A", True, (255, 255, 255))
+        texto_equipo_2 = fuente_pequeña.render("EQUIPO B", True, (0, 0, 0))
+        texto_goles_1 = fuente.render(str(goles[1]), True, (255, 255, 255))
+        texto_goles_2 = fuente.render(str(goles[2]), True, (0, 0, 0))
+        texto_tiempo = fuente.render(f"{int(tiempo_juego // 60):02}:{int(tiempo_juego % 60):02}", True, (200, 200, 0))
+
+        ventana.blit(texto_equipo_1, (20, 10))
+        ventana.blit(texto_equipo_2, (620, 10))
+        ventana.blit(texto_goles_1, (150, 10))
+        ventana.blit(texto_goles_2, (750, 10))
         ventana.blit(texto_tiempo, (ANCHO // 2 - texto_tiempo.get_width() // 2, 10))
-        ventana.blit(texto_marcador_2, (ANCHO - 150, 10))
 
         # Dibujar botones con hover
-        dibujar_boton(ventana, boton_iniciar, "Iniciar", (0, 200, 0) if not boton_iniciar.collidepoint(mouse_pos) else (0, 255, 0), (0, 0, 0), boton_iniciar.collidepoint(mouse_pos))
-        dibujar_boton(ventana, boton_pausar, "Pausar", (200, 200, 0) if not boton_pausar.collidepoint(mouse_pos) else (255, 255, 0), (0, 0, 0), boton_pausar.collidepoint(mouse_pos))
-        dibujar_boton(ventana, boton_reiniciar, "Reiniciar", (200, 0, 0) if not boton_reiniciar.collidepoint(mouse_pos) else (255, 0, 0), (0, 0, 0), boton_reiniciar.collidepoint(mouse_pos))
+        dibujar_boton(ventana, boton_iniciar, "INICIAR JUEGO", (0, 102, 204) if not boton_iniciar.collidepoint(mouse_pos) else (51, 153, 255), (255, 255, 255), boton_iniciar.collidepoint(mouse_pos))
+        dibujar_boton(ventana, boton_pausar, "PAUSAR", (0, 204, 0) if not boton_pausar.collidepoint(mouse_pos) else (51, 255, 51), (0, 0, 0), boton_pausar.collidepoint(mouse_pos))
+        dibujar_boton(ventana, boton_reiniciar, "REINICIAR", (204, 0, 0) if not boton_reiniciar.collidepoint(mouse_pos) else (255, 51, 51), (255, 255, 255), boton_reiniciar.collidepoint(mouse_pos))
 
         if en_juego and not pausa:
             tiempo_juego += reloj.get_time() / 1000
@@ -138,7 +143,7 @@ def main():
                 reiniciar_balon()
 
         elif pausa or not en_juego:
-            texto_pausa = fuente.render("Pausado" if pausa else "Presione 'Iniciar'", True, (255, 255, 255))
+            texto_pausa = fuente.render("Pausado" if pausa else "Presione 'INICIAR JUEGO'", True, (255, 255, 255))
             ventana.blit(texto_pausa, (ANCHO // 2 - texto_pausa.get_width() // 2, 300))
 
         pygame.display.flip()
