@@ -72,13 +72,13 @@ def main():
         ventana.blit(cancha_imagen, (0, 0))
         ############### PRUEBAS ###############
 
-        # pygame.draw.rect(ventana,(0,0,0),(23,156,129,293),1)
-        # pygame.draw.rect(ventana,(255,10,0),(647,156,129,293),1)
+        pygame.draw.rect(ventana,(0,0,0),(23,156,129,293),1)
+        pygame.draw.rect(ventana,(255,10,0),(647,156,129,293),1)
         
-        # pygame.draw.rect(ventana,(0,0,0),(0,219,20,169),1)
-        # pygame.draw.rect(ventana,(255,10,0),(780,219,20,169),1)
+        pygame.draw.rect(ventana,(0,0,0),(0,219,20,169),1)
+        pygame.draw.rect(ventana,(255,10,0),(780,219,20,169),1)
         
-        # pygame.draw.rect(ventana,(255,0,200),(20,17,760,566),1)
+        pygame.draw.rect(ventana,(255,0,200),(20,17,760,566),1)
 
         #######################################
 
