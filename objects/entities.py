@@ -3,7 +3,7 @@ import pygame
 import math
 import random as rd
 
-ANCHO, ALTO = 800, 600
+WIDTH, HEIGHT = 800, 650
 AREA_PORTERIA_1 = pygame.Rect(23, 156, 129, 293)
 AREA_PORTERIA_2 = pygame.Rect(647, 156, 129, 293)
 
@@ -53,10 +53,10 @@ class Jugador:
             #     self.dy *= -1
 
             if self.equipo_id == 1:
-                self.x = max(50, min(self.x, ANCHO // 2 - 50))
+                self.x = max(50, min(self.x, WIDTH // 2 - 50))
             else:
-                self.x = max(ANCHO // 2 + 50, min(self.x, ANCHO - 50))
-            self.y = max(50, min(self.y, ALTO - 50))
+                self.x = max(WIDTH // 2 + 50, min(self.x, WIDTH - 50))
+            self.y = max(50, min(self.y, HEIGHT - 50))
             self.steps -= 1
 
     def dibujar(self, ventana):
@@ -71,7 +71,7 @@ class Portero(Jugador):
 
 class Balon:
     def __init__(self):
-        self.x, self.y = ANCHO // 2, ALTO // 2
+        self.x, self.y = WIDTH // 2, HEIGHT // 2
         self.speed = 5
         self.vx = rd.uniform(-5,5)
         self.vy = rd.choice([-1,1]) * math.sqrt(self.speed**2 - self.vx**2)

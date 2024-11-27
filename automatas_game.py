@@ -3,73 +3,122 @@ import random as rd
 import math
 from objects.entities import Jugador, Portero, Balon
 
-ANCHO, ALTO = 800, 600
+# Dimensiones de la ventana
+WIDTH, HEIGHT = 800, 650
+
+# Colores
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+ORANGE = (255, 120, 0)
+BLUE = (0, 120, 255)
+GREEN = (0, 128, 0)
+RED = (200, 0, 0)
+DARK_BLUE = (0, 51, 102)
+GRAY = (65, 65, 65)
+YELLOW = (255, 255, 0)
+
+# Inicializar Pygame
 pygame.init()
-ventana = pygame.display.set_mode((ANCHO, ALTO))
+ventana = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Football Automatas Game")
 
+# Fuentes
+font_large = pygame.font.Font(None, 50)
+font_medium = pygame.font.Font(None, 40)
+font_small = pygame.font.Font(None, 30)
 
-cancha_imagen = pygame.image.load("rsc/football_bg.png")
-cancha_imagen = pygame.transform.scale(cancha_imagen, (ANCHO, ALTO))
+# Cargar la imagen de la cancha
+cancha_imagen = pygame.image.load("rsc/cancha.png")
+cancha_imagen = pygame.transform.scale(cancha_imagen, (WIDTH, HEIGHT - 100))
 
-
+# Áreas de gol
 AREA_GOL_1 = pygame.Rect(0, 219, 20, 169)  # Portería izquierda
 AREA_GOL_2 = pygame.Rect(780, 219, 20, 169)  # Portería derecha
 
-
-equipo_1 = []
-equipo_2 = []
-portero_1 = Portero(1, 50, ALTO // 2, None, aleatorio=True)
-portero_1.color = (255,255,0)
-portero_2 = Portero(2, ANCHO - 50, ALTO // 2, None, aleatorio=True)
-portero_2.color = (0,0,0)
+# Crear equipos, porteros y balón
+equipo_1 = [Jugador(1, rd.randint(50, 350), rd.randint(100, 500), None, aleatorio=True) for _ in range(10)]
+equipo_2 = [Jugador(2, rd.randint(450, 750), rd.randint(100, 500), None, aleatorio=True) for _ in range(10)]
+portero_1 = Portero(1, 50, HEIGHT // 2, None, aleatorio=True)
+portero_1.color = YELLOW
+portero_2 = Portero(2, WIDTH - 50, HEIGHT // 2, None, aleatorio=True)
+portero_2.color = BLACK
 balon = Balon()
 
-
+# Contadores y estado del juego
 goles = {1: 0, 2: 0}
+tiempo_juego = 0
+en_juego = False
+pausa = False
+juego_terminado = False
+
+# Botones
+buttons = [
+    {"label": "INICIAR JUEGO", "color": GREEN, "rect": pygame.Rect(0, HEIGHT - 50, WIDTH // 3, 50)},
+    {"label": "PAUSA", "color": DARK_BLUE, "rect": pygame.Rect(WIDTH // 3, HEIGHT - 50, WIDTH // 3, 50)},
+    {"label": "REINICIAR", "color": RED, "rect": pygame.Rect(2 * (WIDTH // 3), HEIGHT - 50, WIDTH // 3, 50)},
+]
+
 reloj = pygame.time.Clock()
 
-
-pygame.font.init()
-fuente = pygame.font.Font(None, 36)  # Tamaño de la fuente
-
-
-tiempo_juego = 0  # tiempo en segundos
-
-
-def crear_jugadores_aleatorios(equipo_id, cantidad):
-    jugadores = []
-    for _ in range(cantidad):
-        # Posición aleatoria en su mitad del campo
-        x = rd.randint(50, ANCHO // 2 - 50) if equipo_id == 1 else rd.randint(ANCHO // 2 + 50, ANCHO - 50)
-        y = rd.randint(50, ALTO - 50)
-        jugador = Jugador(equipo_id, x, y, None, aleatorio=True)  # Se agrega parámetro 'aleatorio' para movimiento aleatorio
-        jugadores.append(jugador)
-    return jugadores
-
-
-equipo_1 += crear_jugadores_aleatorios(1, 10)  # Agregar 6 jugadores al equipo 1
-equipo_2 += crear_jugadores_aleatorios(2, 10)  # Agregar 6 jugadores al equipo 2
-
-
 def reiniciar_balon():
-    balon.x, balon.y = ANCHO // 2, ALTO // 2
+    balon.x, balon.y = WIDTH // 2, HEIGHT // 2
     balon.vx = rd.uniform(-5,5)
     balon.vy = rd.choice([-1,1]) * math.sqrt(balon.speed**2 - balon.vx**2)
 
+def dibujar_circulos_tiempo(x, y, minutos_transcurridos):
+    """Dibuja los círculos de estado del tiempo."""
+    for i in range(5):
+        color = WHITE if i < minutos_transcurridos else GRAY
+        pygame.draw.circle(ventana, color, (x + i * 30, y), 8)
+
+def mostrar_ganador():
+    """Muestra un mensaje indicando el ganador."""
+    global juego_terminado
+    ventana.fill(WHITE)
+    resultado = "EMPATE"
+    if goles[1] > goles[2]:
+        resultado = "GANADOR: EQUIPO A"
+    elif goles[2] > goles[1]:
+        resultado = "GANADOR: EQUIPO B"
+    
+    mensaje = font_large.render(resultado, True, BLACK)
+    ventana.blit(mensaje, (WIDTH // 2 - mensaje.get_width() // 2, HEIGHT // 2 - mensaje.get_height() // 2))
+    pygame.display.flip()
+    pygame.time.wait(5000)
+    juego_terminado = True
 
 def main():
-    global tiempo_juego
-    en_juego = True
-    while en_juego:
+    global tiempo_juego, en_juego, pausa, juego_terminado
+    
+    while True:
+        ventana.fill(WHITE)
+
+        # Manejar eventos
+        mouse_pos = pygame.mouse.get_pos()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                en_juego = False
+                pygame.quit()
+                return
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if buttons[0]["rect"].collidepoint(mouse_pos) and not juego_terminado:
+                    en_juego = True
+                    pausa = False
+                elif buttons[1]["rect"].collidepoint(mouse_pos) and not juego_terminado:
+                    pausa = not pausa
+                elif buttons[2]["rect"].collidepoint(mouse_pos):
+                    en_juego = False
+                    pausa = False
+                    juego_terminado = False
+                    reiniciar_balon()
+                    goles[1], goles[2] = 0, 0
+                    tiempo_juego = 0
+        
+        if juego_terminado:
+            mostrar_ganador()
+            continue
 
-        teclas = pygame.key.get_pressed()
-
-
-        ventana.blit(cancha_imagen, (0, 0))
+        # Dibujar cancha
+        ventana.blit(cancha_imagen, (0, 60))
         ############### PRUEBAS ###############
 
         pygame.draw.rect(ventana,(0,0,0),(23,156,129,293),1)
@@ -82,51 +131,62 @@ def main():
 
         #######################################
 
+        # Dibujar marcador y nombres de equipos
+        pygame.draw.rect(ventana, ORANGE, (0, 0, WIDTH // 3, 65))  # Fondo Equipo A
+        pygame.draw.rect(ventana, BLUE, (2 * WIDTH // 3, 0, WIDTH // 3, 65))  # Fondo Equipo B
+        pygame.draw.rect(ventana, BLACK, (WIDTH // 3, 0, WIDTH // 3, 65))  # Fondo marcador
 
-        for jugador in equipo_1 + equipo_2 + [portero_1, portero_2]:
-            if jugador.aleatorio:
-                jugador.mover_aleatorio()  # Llamada al movimiento aleatorio
-            else:
-                jugador.mover(teclas)  # Movimiento controlado solo para el jugador activo
-            jugador.dibujar(ventana)
-            
-            # Colisión entre jugador y balón
-            if balon.colisiona_con(jugador):
-                balon.golpear(jugador)
+        # Textos
+        equipo_a_text = font_small.render("EQUIPO A", True, WHITE)
+        equipo_b_text = font_small.render("EQUIPO B", True, WHITE)
+        marcador_text1 = font_large.render(f"{goles[1]}", True, WHITE)
+        marcador_text2 = font_large.render(f"{goles[2]}", True, WHITE)
+        tiempo_text = font_medium.render(f"{int(tiempo_juego // 60):02}:{int(tiempo_juego % 60):02}", True, WHITE)
 
-        # Movimiento y dibujo del balón
-        balon.mover()
-        balon.dibujar(ventana)
+        # Posicionar textos
+        ventana.blit(equipo_a_text, (20, 23))
+        ventana.blit(equipo_b_text, (WIDTH - 120, 23))
+        ventana.blit(marcador_text1, (WIDTH // 4 - marcador_text1.get_width() // 2, 15))
+        ventana.blit(marcador_text2, (WIDTH // 1.35 - marcador_text2.get_width() // 2, 15))
+        ventana.blit(tiempo_text, (WIDTH // 2 - tiempo_text.get_width() // 2, 10))
 
-        # Detección de gol
-        if AREA_GOL_1.collidepoint(balon.x, balon.y):
-            goles[2] += 1  # Gol para el equipo 2
-            print(f"Gol del Equipo 2! Marcador: Equipo 1 - {goles[1]}, Equipo 2 - {goles[2]}")
-            reiniciar_balon()
+        # Dibujar círculos de tiempo
+        minutos_transcurridos = int(tiempo_juego // 60)
+        dibujar_circulos_tiempo(WIDTH // 2 - 61, 46, minutos_transcurridos)
 
-        elif AREA_GOL_2.collidepoint(balon.x, balon.y):
-            goles[1] += 1  # Gol para el equipo 1
-            print(f"Gol del Equipo 1! Marcador: Equipo 1 - {goles[1]}, Equipo 2 - {goles[2]}")
-            reiniciar_balon()
+        # Dibujar botones
+        for button in buttons:
+            pygame.draw.rect(ventana, button["color"], button["rect"])
+            label = font_small.render(button["label"], True, WHITE)
+            ventana.blit(label, (button["rect"].x + (button["rect"].width - label.get_width()) // 2,
+                                button["rect"].y + (button["rect"].height - label.get_height()) // 2))
 
+        if en_juego and not pausa:
+            tiempo_juego += reloj.get_time() / 1000
+            if tiempo_juego >= 300:  # Fin del juego a los 5 minutos
+                en_juego = False
+                mostrar_ganador()
 
-        tiempo_juego += reloj.get_time() / 1000  # convertimos de milisegundos a segundos
-        minutos = int(tiempo_juego // 60)
-        segundos = int(tiempo_juego % 60)
+            for jugador in equipo_1 + equipo_2 + [portero_1, portero_2]:
+                jugador.mover_aleatorio()
+                jugador.dibujar(ventana)
+                if balon.colisiona_con(jugador):
+                    balon.golpear(jugador)
 
+            # Movimiento y dibujo del balón
+            balon.mover()
+            balon.dibujar(ventana)
 
-        texto_marcador = fuente.render(f"Equipo 1: {goles[1]}  Equipo 2: {goles[2]}", True, (255, 255, 255))
-        texto_tiempo = fuente.render(f"Tiempo: {minutos:02}:{segundos:02}", True, (255, 255, 255))
-
-
-        ventana.blit(texto_marcador, (ANCHO // 2 - texto_marcador.get_width() // 2, 10))
-        ventana.blit(texto_tiempo, (ANCHO // 2 - texto_tiempo.get_width() // 2, 40))
-
+            # Detección de gol
+            if AREA_GOL_1.collidepoint(balon.x, balon.y):
+                goles[2] += 1  # Gol para el equipo 2
+                reiniciar_balon()
+            elif AREA_GOL_2.collidepoint(balon.x, balon.y):
+                goles[1] += 1  # Gol para el equipo 1
+                reiniciar_balon()
 
         pygame.display.flip()
         reloj.tick(60)
-
-    pygame.quit()
 
 if __name__ == "__main__":
     main()
