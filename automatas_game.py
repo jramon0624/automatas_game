@@ -4,8 +4,8 @@ import math
 from objects.entities import Jugador, Portero, Balon
 
 # Dimensiones de la ventana
-ANCHO = 900 
-ALTO = 700
+ANCHO = 800  
+ALTO = 650
 
 # Colores
 BLANCO = (255, 255, 255)
@@ -208,14 +208,21 @@ def principal():
                 reiniciar_balon()
         
         ############### PRUEBAS ###############
-
-        # pygame.draw.rect(ventana,BLACK,(30,250,42,172),1) # Area portero
-        # pygame.draw.rect(ventana,ROJO,(727,250,42,172),1) # Area portero
         
-        # pygame.draw.rect(ventana,BLACK,(0,285,30,103),1) # Area Gol
-        # pygame.draw.rect(ventana,ROJO,(768,285,30,103),1) # Area Gol
+        # # Áreas de diseño de porterías
+        # pygame.draw.rect(pantalla, (0, 0, 0), AREA_GOL_1, width=2)
+        # pygame.draw.rect(pantalla, (0, 0, 0), AREA_GOL_2, width=2)
         
-        # pygame.draw.rect(ventana,ORANGE,(30,78,739,516),1) # Area chancha
+        # # Areas para el movimientos de porteros
+        # pygame.draw.rect(pantalla,NEGRO,(35,270,45,181),1) # Area portero 1
+        # pygame.draw.rect(pantalla,ROJO,(840,250,42,172),1) # Area portero 2
+        
+        # # Area de juego para los equipos
+        # pygame.draw.rect(pantalla, (218, 98, 14),(32, 81, 600, 560) , width=4)
+        # pygame.draw.rect(pantalla, (28, 119, 222),(270, 81, 596, 560) , width=4)
+        
+        # # Area total de la cancha para la colision de la pelota
+        # pygame.draw.rect(pantalla, (0, 0, 0),(32, 81, 835, 560) , width=2)
 
         #######################################
 
