@@ -4,7 +4,7 @@ import math
 from objects.entities import Jugador, Portero, Balon
 
 # Dimensiones de la ventana
-ANCHO = 800  
+ANCHO = 800 
 ALTO = 650
 
 # Colores
