@@ -59,10 +59,23 @@ class Jugador:
 
 class Portero(Jugador):
     def mover_aleatorio(self):
-        super().mover_aleatorio()
-        area = AREA_PORTERIA_1 if self.equipo_id == 1 else AREA_PORTERIA_2
-        if not area.collidepoint(self.x + self.radius, self.y + self.radius):
-            self.x, self.y = max(area.left + self.radius, min(area.right - self.radius, self.x)), max(area.top + self.radius, min(area.bottom - self.radius, self.y))
+        if self.aleatorio:
+            if self.steps <= 0:
+                self.steps = rd.randint(5,20)
+                theta = math.atan(self.dy/self.dx if self.dx != 0 else 100000)
+                # sigma = rd.gauss(mu=math.pi,sigma=1.0)
+                # phi = rd.gauss(mu=0.0,sigma=sigma)
+                phi = rd.uniform(-math.pi,math.pi)
+
+                self.dx = self.velocidad * math.cos(theta + phi)
+                self.dy = self.velocidad * math.sin(theta + phi)
+            self.x += self.dx
+            self.y += self.dy
+
+            area = AREA_PORTERIA_1 if self.equipo_id == 1 else AREA_PORTERIA_2
+            if not area.collidepoint(self.x + self.radius, self.y + self.radius):
+                self.x, self.y = max(area.left + self.radius, min(area.right - self.radius, self.x)), max(area.top + self.radius, min(area.bottom - self.radius, self.y))
+            self.steps -= 1
 
 class Balon:
     steps = 500
