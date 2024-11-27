@@ -4,8 +4,8 @@ import math
 import random as rd
 
 WIDTH, HEIGHT = 800, 650
-AREA_PORTERIA_1 = pygame.Rect(23, 156, 129, 293)
-AREA_PORTERIA_2 = pygame.Rect(647, 156, 129, 293)
+AREA_PORTERIA_1 = pygame.Rect(30, 250, 42, 172)
+AREA_PORTERIA_2 = pygame.Rect(727, 250, 42, 172)
 
 class Jugador:
     def __init__(self, equipo_id, x, y, controles=None, aleatorio=False):
@@ -14,7 +14,7 @@ class Jugador:
         self.y = y
         self.controles = controles
         self.aleatorio = aleatorio  
-        self.velocidad = 5
+        self.velocidad = 3
         self.radius = 10  
         self.active = False
         self.color = (0, 0, 255) if self.equipo_id == 1 else (255, 0, 0)
@@ -36,27 +36,22 @@ class Jugador:
     def mover_aleatorio(self):
         if self.aleatorio:
             if self.steps <= 0:
-                self.steps = rd.randint(0,10)
+                self.steps = rd.randint(5,20)
                 theta = math.atan(self.dy/self.dx if self.dx != 0 else 100000)
-                sigma = rd.gauss(mu=math.pi,sigma=1.0)
-                phi = rd.gauss(mu=0.0,sigma=sigma)
-                # phi = rd.uniform(-math.pi,math.pi)
+                # sigma = rd.gauss(mu=math.pi,sigma=1.0)
+                # phi = rd.gauss(mu=0.0,sigma=sigma)
+                phi = rd.uniform(-math.pi,math.pi)
 
                 self.dx = self.velocidad * math.cos(theta + phi)
                 self.dy = self.velocidad * math.sin(theta + phi)
             self.x += self.dx
             self.y += self.dy
 
-            # if (self.x <= 20 + self.radius or self.x >= 780 - self.radius):
-            #     self.dx *= -1
-            # if self.y <= 17 + self.radius or self.y >= 583 - self.radius:
-            #     self.dy *= -1
-
             if self.equipo_id == 1:
-                self.x = max(50, min(self.x, WIDTH // 2 - 50))
+                self.x = max(30 + self.radius, min(self.x, 30 + (3 * 739//4) - self.radius))
             else:
-                self.x = max(WIDTH // 2 + 50, min(self.x, WIDTH - 50))
-            self.y = max(50, min(self.y, HEIGHT - 50))
+                self.x = max(30 + 739//4 + self.radius, min(self.x, 739 + 30 - self.radius))
+            self.y = max(78 + self.radius, min(self.y, 594 - self.radius))
             self.steps -= 1
 
     def dibujar(self, ventana):
@@ -67,23 +62,28 @@ class Portero(Jugador):
         super().mover_aleatorio()
         area = AREA_PORTERIA_1 if self.equipo_id == 1 else AREA_PORTERIA_2
         if not area.collidepoint(self.x + self.radius, self.y + self.radius):
-            self.x, self.y = max(area.left, min(area.right, self.x)), max(area.top, min(area.bottom, self.y))
+            self.x, self.y = max(area.left + self.radius, min(area.right - self.radius, self.x)), max(area.top + self.radius, min(area.bottom - self.radius, self.y))
 
 class Balon:
+    steps = 500
+    restrict = 500
+
     def __init__(self):
-        self.x, self.y = WIDTH // 2, HEIGHT // 2
+        self.x, self.y = 30 + 739//2, 78 + 516// 2
         self.speed = 5
         self.vx = rd.uniform(-5,5)
         self.vy = rd.choice([-1,1]) * math.sqrt(self.speed**2 - self.vx**2)
         self.radius = 8
 
     def mover(self):
-        self.x += self.vx
-        self.y += self.vy
+        if self.steps != 0:
+            self.steps -=1
+        self.x += (self.steps/self.restrict) * self.vx
+        self.y += (self.steps/self.restrict) * self.vy
         # Rebotar en los bordes
-        if (self.x <= 20 + self.radius or self.x >= 780 - self.radius) and (self.y < 219 + self.radius or self.y > 388 - self.radius):
+        if (self.x <= 30 + self.radius or self.x >= 769 - self.radius) and (self.y < 285 + self.radius or self.y > 388 - self.radius):
             self.vx *= -1
-        if self.y <= 17 + self.radius or self.y >= 583 - self.radius:
+        if self.y <= 78 + self.radius or self.y >= 594 - self.radius:
             self.vy *= -1
 
     def golpear(self, jugador):
@@ -94,10 +94,7 @@ class Balon:
 
         self.vx = dx
         self.vy = rd.choice([-1,1]) * math.sqrt(self.speed**2 - self.vx**2)
-        #distancia = math.hypot(dx, dy)
-        
-        #self.vx = (dx / distancia) * self.speed
-        #self.vy = (dy / distancia) * self.speed
+        self.steps = self.restrict
 
     def dibujar(self, ventana):
         pygame.draw.circle(ventana, (255, 255, 255), (int(self.x), int(self.y)), self.radius)

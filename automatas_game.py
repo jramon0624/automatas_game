@@ -32,8 +32,8 @@ cancha_imagen = pygame.image.load("rsc/cancha.png")
 cancha_imagen = pygame.transform.scale(cancha_imagen, (WIDTH, HEIGHT - 100))
 
 # Áreas de gol
-AREA_GOL_1 = pygame.Rect(0, 219, 20, 169)  # Portería izquierda
-AREA_GOL_2 = pygame.Rect(780, 219, 20, 169)  # Portería derecha
+AREA_GOL_1 = pygame.Rect(0, 285, 30, 103)  # Portería izquierda
+AREA_GOL_2 = pygame.Rect(768, 285, 30, 103)  # Portería derecha
 
 # Crear equipos, porteros y balón
 equipo_1 = [Jugador(1, rd.randint(50, 350), rd.randint(100, 500), None, aleatorio=True) for _ in range(10)]
@@ -61,7 +61,7 @@ buttons = [
 reloj = pygame.time.Clock()
 
 def reiniciar_balon():
-    balon.x, balon.y = WIDTH // 2, HEIGHT // 2
+    balon.x, balon.y = 30 + 739//2, 78 + 516// 2
     balon.vx = rd.uniform(-5,5)
     balon.vy = rd.choice([-1,1]) * math.sqrt(balon.speed**2 - balon.vx**2)
 
@@ -119,17 +119,6 @@ def main():
 
         # Dibujar cancha
         ventana.blit(cancha_imagen, (0, 60))
-        ############### PRUEBAS ###############
-
-        pygame.draw.rect(ventana,(0,0,0),(23,156,129,293),1)
-        pygame.draw.rect(ventana,(255,10,0),(647,156,129,293),1)
-        
-        pygame.draw.rect(ventana,(0,0,0),(0,219,20,169),1)
-        pygame.draw.rect(ventana,(255,10,0),(780,219,20,169),1)
-        
-        pygame.draw.rect(ventana,(255,0,200),(20,17,760,566),1)
-
-        #######################################
 
         # Dibujar marcador y nombres de equipos
         pygame.draw.rect(ventana, ORANGE, (0, 0, WIDTH // 3, 65))  # Fondo Equipo A
@@ -184,6 +173,18 @@ def main():
             elif AREA_GOL_2.collidepoint(balon.x, balon.y):
                 goles[1] += 1  # Gol para el equipo 1
                 reiniciar_balon()
+        
+        ############### PRUEBAS ###############
+
+        # pygame.draw.rect(ventana,BLACK,(30,250,42,172),1) # Area portero
+        # pygame.draw.rect(ventana,RED,(727,250,42,172),1) # Area portero
+        
+        # pygame.draw.rect(ventana,BLACK,(0,285,30,103),1) # Area Gol
+        # pygame.draw.rect(ventana,RED,(768,285,30,103),1) # Area Gol
+        
+        # pygame.draw.rect(ventana,ORANGE,(30,78,739,516),1) # Area chancha
+
+        #######################################
 
         pygame.display.flip()
         reloj.tick(60)
