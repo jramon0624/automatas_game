@@ -2,21 +2,7 @@ import pygame
 import random as rd
 import math
 from objects.entities import Jugador, Portero, Balon
-
-# Dimensiones de la ventana
-ANCHO = 800  
-ALTO = 650
-
-# Colores
-BLANCO = (255, 255, 255)
-NEGRO = (0, 0, 0)
-NARANJA = (255, 120, 0)
-AZUL = (0, 120, 255)
-VERDE = (0, 128, 0)
-ROJO = (200, 0, 0)
-AZUL_OSCURO = (0, 51, 102)
-GRIS = (65, 65, 65)
-AMARILLO = (255, 255, 0)
+from cons import *
 
 # Inicializar Pygame
 pygame.init()
@@ -28,27 +14,21 @@ pygame.display.set_caption("Juego autómata de Fútbol")
 # sonido_pausa = pygame.mixer.Sound("rsc/pausa.wav") 
 # sonido_reanudar = pygame.mixer.Sound("rsc/reanudar.wav")
 
-
 # Fuentes
 fuente_grande = pygame.font.Font(None, 50)
 fuente_media = pygame.font.Font(None, 40)
 fuente_pequena = pygame.font.Font(None, 30)
 
-
 # Cargar la imagen de la cancha
 imagen_cancha = pygame.image.load("rsc/cancha.png")
-imagen_cancha = pygame.transform.scale(imagen_cancha, (ANCHO, ALTO - 100))
-
-# Áreas de gol
-AREA_GOL_1 = pygame.Rect(0, 285, 30, 103)  # Portería izquierda
-AREA_GOL_2 = pygame.Rect(768, 285, 30, 103)  # Portería derecha
+imagen_cancha = pygame.transform.scale(imagen_cancha, (ANCHO_CANCHA, ALTO_CANCHA))
 
 # Crear equipos, porteros y balón
-equipo_1 = [Jugador(1, rd.randint(50, 350), rd.randint(100, 500), None, aleatorio=True) for _ in range(10)]
-equipo_2 = [Jugador(2, rd.randint(450, 750), rd.randint(100, 500), None, aleatorio=True) for _ in range(10)]
-portero_1 = Portero(1, 50, ALTO // 2, None, aleatorio=True)
+equipo_1 = [Jugador(1, rd.uniform(50*ANCHO_CANCHA/800, 350*ANCHO_CANCHA/800), rd.uniform(100*ALTO_CANCHA/550, 500*ALTO_CANCHA/500), None, aleatorio=True) for _ in range(10)]
+equipo_2 = [Jugador(2, rd.uniform(450*ANCHO_CANCHA/800, 750*ANCHO_CANCHA/800), rd.uniform(100*ALTO_CANCHA/550, 500*ALTO_CANCHA/500), None, aleatorio=True) for _ in range(10)]
+portero_1 = Portero(1, 50*ANCHO_CANCHA/800, (ALTO // 2)*ALTO_CANCHA/550, None, aleatorio=True)
 portero_1.color = AMARILLO
-portero_2 = Portero(2, ANCHO - 50, ALTO // 2, None, aleatorio=True)
+portero_2 = Portero(2, (ANCHO - 50)*ANCHO_CANCHA/800, (ALTO // 2)*ALTO_CANCHA/550, None, aleatorio=True)
 portero_2.color = NEGRO
 balon = Balon()
 
@@ -69,7 +49,7 @@ botones = [
 reloj = pygame.time.Clock()
 
 def reiniciar_balon():
-    balon.x, balon.y = 30 + 739//2, 78 + 516// 2
+    balon.x, balon.y = (AREA_CANCHA.right - AREA_CANCHA.left)/2 + AREA_CANCHA.left, (AREA_CANCHA.bottom - AREA_CANCHA.top)/2 + AREA_CANCHA.top
     balon.vx = rd.uniform(-5,5)
     balon.vy = rd.choice([-1,1]) * math.sqrt(balon.speed**2 - balon.vx**2)
 
@@ -137,7 +117,7 @@ def principal():
             continue
         
         # Dibujar cancha
-        pantalla.blit(imagen_cancha, (0, 60))
+        pantalla.blit(imagen_cancha, PUNTO_CANCHA)
 
         # Dibujar marcador y nombres de equipos
         pygame.draw.rect(pantalla, NARANJA, (0, 0, ANCHO // 3, 65))  # Fondo Equipo A
@@ -209,20 +189,20 @@ def principal():
         
         ############### PRUEBAS ###############
         
-        # # Áreas de diseño de porterías
-        # pygame.draw.rect(pantalla, (0, 0, 0), AREA_GOL_1, width=2)
-        # pygame.draw.rect(pantalla, (0, 0, 0), AREA_GOL_2, width=2)
+        # Áreas de diseño de porterías
+        pygame.draw.rect(pantalla, (0, 0, 0), (0*ANCHO_CANCHA/800 + PUNTO_CANCHA[0], 225*ALTO_CANCHA/550 + PUNTO_CANCHA[1], 30*ANCHO_CANCHA/800, 103*ALTO_CANCHA/550), width=2)
+        pygame.draw.rect(pantalla, (0, 0, 0), (768*ANCHO_CANCHA/800 + PUNTO_CANCHA[0], 225*ALTO_CANCHA/550 + PUNTO_CANCHA[1], 30*ANCHO_CANCHA/800, 103*ALTO_CANCHA/550), width=2)
         
-        # # Areas para el movimientos de porteros
-        # pygame.draw.rect(pantalla,NEGRO,(35,270,45,181),1) # Area portero 1
-        # pygame.draw.rect(pantalla,ROJO,(840,250,42,172),1) # Area portero 2
+        # Areas para el movimientos de porteros
+        pygame.draw.rect(pantalla,NEGRO,(30*ANCHO_CANCHA/800 + PUNTO_CANCHA[0], 190*ALTO_CANCHA/550 + PUNTO_CANCHA[1], 42*ANCHO_CANCHA/800, 172*ALTO_CANCHA/550),1) # Area portero 1
+        pygame.draw.rect(pantalla,ROJO,(727*ANCHO_CANCHA/800 + PUNTO_CANCHA[0], 190*ALTO_CANCHA/550 + PUNTO_CANCHA[1], 42*ANCHO_CANCHA/800, 172*ALTO_CANCHA/550),1) # Area portero 2
         
-        # # Area de juego para los equipos
+        # Area de juego para los equipos
         # pygame.draw.rect(pantalla, (218, 98, 14),(32, 81, 600, 560) , width=4)
         # pygame.draw.rect(pantalla, (28, 119, 222),(270, 81, 596, 560) , width=4)
         
-        # # Area total de la cancha para la colision de la pelota
-        # pygame.draw.rect(pantalla, (0, 0, 0),(32, 81, 835, 560) , width=2)
+        # Area total de la cancha para la colision de la pelota
+        pygame.draw.rect(pantalla, NARANJA,(30*ANCHO_CANCHA/800 + PUNTO_CANCHA[0], 18*ALTO_CANCHA/550 + PUNTO_CANCHA[1], 739*ANCHO_CANCHA/800, 516*ALTO_CANCHA/550) , width=2)
 
         #######################################
 
