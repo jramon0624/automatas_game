@@ -4,7 +4,7 @@ import math
 from objects.entities import Jugador, Portero, Balon
 
 # Dimensiones de la ventana
-ANCHO = 800 
+ANCHO = 800  
 ALTO = 650
 
 # Colores
@@ -23,10 +23,11 @@ pygame.init()
 pantalla = pygame.display.set_mode((ANCHO, ALTO))
 pygame.display.set_caption("Juego autómata de Fútbol")
 
-# Cargar sonidos pygame.mixer.init() 
-# sonido_gol = pygame.mixer.Sound("rsc/gol.wav") 
-# sonido_pausa = pygame.mixer.Sound("rsc/pausa.wav") 
-# sonido_reanudar = pygame.mixer.Sound("rsc/reanudar.wav")
+# Cargar sonidos 
+pygame.mixer.init() 
+Soundtrack = pygame.mixer.Sound("Sonidos/Soundtrack.mp3") 
+gol = pygame.mixer.Sound("Sonidos/Gol.mp3") 
+Ganador = pygame.mixer.Sound("Sonidos/Ganador.mp3")
 
 
 # Fuentes
@@ -40,6 +41,10 @@ imagen_cancha = pygame.image.load("rsc/cancha.png")
 imagen_cancha = pygame.transform.scale(imagen_cancha, (ANCHO, ALTO - 100))
 
 # Áreas de gol
+#MIO
+# AREA_GOL_1 = pygame.Rect(0, 315, 30, 103)  # Portería izquierda
+# AREA_GOL_2 = pygame.Rect(768, 285, 30, 103)  # Portería derecha
+#JUAN
 AREA_GOL_1 = pygame.Rect(0, 285, 30, 103)  # Portería izquierda
 AREA_GOL_2 = pygame.Rect(768, 285, 30, 103)  # Portería derecha
 
@@ -104,7 +109,6 @@ def mostrar_ganador():
 
 def principal():
     global tiempo_juego, en_juego, pausa, juego_terminado
-
     while True:
         pantalla.fill(BLANCO)
 
@@ -133,6 +137,7 @@ def principal():
                     tiempo_juego = 0
         
         if juego_terminado:
+            
             mostrar_ganador()
             continue
         
@@ -184,6 +189,7 @@ def principal():
                                 boton["rect"].y + (boton["rect"].height - label.get_height()) // 2))
 
         if en_juego and not pausa:
+            Soundtrack.play()
             tiempo_juego += reloj.get_time() / 1000
             if tiempo_juego >= 300:  # Fin del juego a los 5 minutos
                 en_juego = False
@@ -202,9 +208,11 @@ def principal():
             # Detección de gol
             if AREA_GOL_1.collidepoint(balon.x, balon.y):
                 goles[2] += 1  # Gol para el equipo 2
+                gol.play()
                 reiniciar_balon()
             elif AREA_GOL_2.collidepoint(balon.x, balon.y):
                 goles[1] += 1  # Gol para el equipo 1
+                gol.play()
                 reiniciar_balon()
         
         ############### PRUEBAS ###############
@@ -215,7 +223,7 @@ def principal():
         
         # # Areas para el movimientos de porteros
         # pygame.draw.rect(pantalla,NEGRO,(35,270,45,181),1) # Area portero 1
-        # pygame.draw.rect(pantalla,ROJO,(840,250,42,172),1) # Area portero 2
+        # pygame.draw.rect(pantalla,ROJO,(819,270,42,181),1) # Area portero 2
         
         # # Area de juego para los equipos
         # pygame.draw.rect(pantalla, (218, 98, 14),(32, 81, 600, 560) , width=4)
@@ -227,6 +235,7 @@ def principal():
         #######################################
 
         if pausa: 
+            Soundtrack.stop()
             pausa_text = fuente_grande.render("Juego pausado", True, BLANCO) 
             pantalla.blit(pausa_text, (ANCHO // 2 - pausa_text.get_width() // 2, ALTO // 2 - pausa_text.get_height() // 2))
             

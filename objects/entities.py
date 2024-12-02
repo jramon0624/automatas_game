@@ -14,7 +14,7 @@ class Jugador:
         self.y = y
         self.controles = controles
         self.aleatorio = aleatorio  
-        self.velocidad = 3
+        self.velocidad = 2
         self.radius = 10  
         self.active = False
         self.color = (0, 0, 255) if self.equipo_id == 1 else (255, 0, 0)
