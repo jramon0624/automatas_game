@@ -1,7 +1,7 @@
 import pygame
 # Dimensiones de la ventana
-ANCHO = 800 # 800
-ALTO = 750  # 650
+ANCHO = 900 # 800
+ALTO = 700  # 650
 
 ALTO_CANCHA = ALTO - 100
 ANCHO_CANCHA = ANCHO

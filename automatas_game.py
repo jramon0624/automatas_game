@@ -1,22 +1,9 @@
 import pygame
 import random as rd
 import math
+from cons import *
 from objects.entities import Jugador, Portero, Balon
 
-# Dimensiones de la ventana
-ANCHO = 800 
-ALTO = 650
-
-# Colores
-BLANCO = (255, 255, 255)
-NEGRO = (0, 0, 0)
-NARANJA = (255, 120, 0)
-AZUL = (0, 120, 255)
-VERDE = (0, 128, 0)
-ROJO = (200, 0, 0)
-AZUL_OSCURO = (0, 51, 102)
-GRIS = (65, 65, 65)
-AMARILLO = (255, 255, 0)
 
 # Inicializar Pygame
 pygame.init()
@@ -24,8 +11,8 @@ pantalla = pygame.display.set_mode((ANCHO, ALTO))
 pygame.display.set_caption("Juego autómata de Fútbol")
 
 # Cargar sonidos pygame.mixer.init() 
-# sonido_gol = pygame.mixer.Sound("rsc/gol.wav") 
-# sonido_pausa = pygame.mixer.Sound("rsc/pausa.wav") 
+Soundtrack = pygame.mixer.Sound("Sonidos/Soundtrack.mp3") 
+gol = pygame.mixer.Sound("Sonidos/Gol.mp3") 
 # sonido_reanudar = pygame.mixer.Sound("rsc/reanudar.wav")
 
 
@@ -38,9 +25,6 @@ fuente_pequena = pygame.font.Font(None, 30)
 imagen_cancha = pygame.image.load("rsc/cancha.png")
 imagen_cancha = pygame.transform.scale(imagen_cancha, (ANCHO, ALTO - 100))
 
-# Áreas de gol
-AREA_GOL_1 = pygame.Rect(0, 285, 30, 103)  # Portería izquierda
-AREA_GOL_2 = pygame.Rect(768, 285, 30, 103)  # Portería derecha
 
 # Crear equipos, porteros y balón
 equipo_1 = [Jugador(1, rd.uniform(50*ANCHO_CANCHA/800, 350*ANCHO_CANCHA/800), rd.uniform(100*ALTO_CANCHA/550, 500*ALTO_CANCHA/500), None, aleatorio=True) for _ in range(10)]
