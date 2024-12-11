@@ -4,17 +4,15 @@ import math
 from cons import *
 from objects.entities import Jugador, Portero, Balon
 
-
 # Inicializar Pygame
 pygame.init()
 pantalla = pygame.display.set_mode((ANCHO, ALTO))
 pygame.display.set_caption("Juego autómata de Fútbol")
 
-# Cargar sonidos pygame.mixer.init() 
-Soundtrack = pygame.mixer.Sound("Sonidos/Soundtrack.mp3") 
-gol = pygame.mixer.Sound("Sonidos/Gol.mp3") 
-# sonido_reanudar = pygame.mixer.Sound("rsc/reanudar.wav")
-
+# Cargar sonidos
+pygame.mixer.init()
+pygame.mixer.music.load("Sonidos/Soundtrack.mp3")
+gol = pygame.mixer.Sound("Sonidos/Gol.mp3")
 
 # Fuentes
 fuente_grande = pygame.font.Font(None, 50)
@@ -24,7 +22,6 @@ fuente_pequena = pygame.font.Font(None, 30)
 # Cargar la imagen de la cancha
 imagen_cancha = pygame.image.load("rsc/cancha.png")
 imagen_cancha = pygame.transform.scale(imagen_cancha, (ANCHO, ALTO - 100))
-
 
 # Crear equipos, porteros y balón
 equipo_1 = [Jugador(1, rd.uniform(50*ANCHO_CANCHA/800, 350*ANCHO_CANCHA/800), rd.uniform(100*ALTO_CANCHA/550, 500*ALTO_CANCHA/500), None, aleatorio=True) for _ in range(10)]
@@ -68,11 +65,9 @@ def dibujar_circulos_tiempo(x, y, minutos_transcurridos):
             pygame.draw.circle(pantalla, fondo, (x + i * 30, y), 9)
             pygame.draw.circle(pantalla, contorno, (x + i * 30, y), 9, 3)
 
-
 def mostrar_ganador():
-    """Muestra un mensaje indicando el ganador."""
+    """Muestra un mensaje indicando el ganador y permite reiniciar o cerrar el juego."""
     global juego_terminado
-    pantalla.fill(BLANCO)
     resultado = "EMPATE"
     if goles[1] > goles[2]:
         resultado = "GANADOR: EQUIPO A"
@@ -81,9 +76,35 @@ def mostrar_ganador():
     
     mensaje = fuente_grande.render(resultado, True, NEGRO)
     pantalla.blit(mensaje, (ANCHO // 2 - mensaje.get_width() // 2, ALTO // 2 - mensaje.get_height() // 2))
+
+    # Botones de reiniciar y salir
+    boton_reiniciar = pygame.Rect(ANCHO // 4 - 100, ALTO // 2 + 50, 200, 50)
+    boton_salir = pygame.Rect(3 * ANCHO // 4 - 100, ALTO // 2 + 50, 200, 50)
+    pygame.draw.rect(pantalla, VERDE, boton_reiniciar)
+    pygame.draw.rect(pantalla, ROJO, boton_salir)
+    reiniciar_text = fuente_pequena.render("REINICIAR", True, BLANCO)
+    salir_text = fuente_pequena.render("SALIR", True, BLANCO)
+    pantalla.blit(reiniciar_text, (boton_reiniciar.x + (boton_reiniciar.width - reiniciar_text.get_width()) // 2,
+                                   boton_reiniciar.y + (boton_reiniciar.height - reiniciar_text.get_height()) // 2))
+    pantalla.blit(salir_text, (boton_salir.x + (boton_salir.width - salir_text.get_width()) // 2,
+                               boton_salir.y + (boton_salir.height - salir_text.get_height()) // 2))
     pygame.display.flip()
-    pygame.time.wait(5000)
-    juego_terminado = True
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                return
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if boton_reiniciar.collidepoint(event.pos):
+                    juego_terminado = False
+                    reiniciar_balon()
+                    goles[1], goles[2] = 0, 0
+                    tiempo_juego = 0
+                    return
+                elif boton_salir.collidepoint(event.pos):
+                    pygame.quit()
+                    return
 
 def principal():
     global tiempo_juego, en_juego, pausa, juego_terminado
@@ -100,11 +121,14 @@ def principal():
                 if botones[0]["rect"].collidepoint(mouse_pos) and not juego_terminado:
                     en_juego = True
                     pausa = False
-                elif botones[1]["rect"].collidepoint(mouse_pos) and not juego_terminado:
+                    pygame.mixer.music.play(-1)
+                elif botones[1]["rect"].collidepoint(mouse_pos) and en_juego and not juego_terminado:
                     pausa = not pausa
                     if pausa:
+                        pygame.mixer.music.pause()
                         botones[1]["label"] = "REANUDAR"
                     else:
+                        pygame.mixer.music.unpause()
                         botones[1]["label"] = "PAUSA"
                 elif botones[2]["rect"].collidepoint(mouse_pos):
                     en_juego = False
@@ -113,9 +137,9 @@ def principal():
                     reiniciar_balon()
                     goles[1], goles[2] = 0, 0
                     tiempo_juego = 0
+                    pygame.mixer.music.stop()
         
         if juego_terminado:
-            
             mostrar_ganador()
             continue
         
@@ -138,7 +162,7 @@ def principal():
         # Dibujar el contorno negro
         # Marcador A
         pygame.draw.rect(pantalla, NEGRO, (ANCHO // 4.5, 7, ancho_del_cuadrado, alto_del_cuadrado), 2)  # El último parámetro es el grosor del contorno
-        # Marcador A
+        # Marcador B
         pygame.draw.rect(pantalla, NEGRO, (641, 7, ancho_del_cuadrado, alto_del_cuadrado), 2)  # El último parámetro es el grosor del contorno
         
         # Textos
@@ -167,7 +191,8 @@ def principal():
                                 boton["rect"].y + (boton["rect"].height - label.get_height()) // 2))
 
         if en_juego and not pausa:
-            Soundtrack.play()
+            if not pygame.mixer.music.get_busy():
+                pygame.mixer.music.play(-1)
             tiempo_juego += reloj.get_time() / 1000
             if tiempo_juego >= 300:  # Fin del juego a los 5 minutos
                 en_juego = False
@@ -187,10 +212,16 @@ def principal():
             if AREA_GOL_1.collidepoint(balon.x, balon.y):
                 goles[2] += 1  # Gol para el equipo 2
                 gol.play()
+                pygame.mixer.music.set_volume(0.2)
+                pygame.time.wait(1000)
+                pygame.mixer.music.set_volume(1.0)
                 reiniciar_balon()
             elif AREA_GOL_2.collidepoint(balon.x, balon.y):
                 goles[1] += 1  # Gol para el equipo 1
                 gol.play()
+                pygame.mixer.music.set_volume(0.2)
+                pygame.time.wait(1000)
+                pygame.mixer.music.set_volume(1.0)
                 reiniciar_balon()
         
         ############### PRUEBAS ###############
@@ -213,7 +244,6 @@ def principal():
         #######################################
 
         if pausa: 
-            Soundtrack.stop()
             pausa_text = fuente_grande.render("Juego pausado", True, BLANCO) 
             pantalla.blit(pausa_text, (ANCHO // 2 - pausa_text.get_width() // 2, ALTO // 2 - pausa_text.get_height() // 2))
             
